@@ -44,6 +44,7 @@ func readFeatures(ctx *gousb.Context) {
 	}
 
 	device := devs[0]
+	device.Reset()
 
 	iface, done, err := device.DefaultInterface()
 	if err != nil {
