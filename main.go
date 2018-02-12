@@ -71,7 +71,10 @@ func readFeatures(ctx *gousb.Context) {
 	log.Printf(spew.Sdump(initialize))
 
 	done()
-	device.Close()
+	err = device.Close()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func match(desc *gousb.DeviceDesc) bool {
