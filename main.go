@@ -66,8 +66,15 @@ func readFeatures(ctx *gousb.Context) {
 		Data: []byte{},
 	}
 
-	initialize.WriteTo(outEndpoint)
-	initialize.ReadFrom(inEndpoint)
+	_, err = initialize.WriteTo(outEndpoint)
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = initialize.ReadFrom(inEndpoint)
+	if err != nil {
+		panic(err)
+	}
 
 	log.Printf(spew.Sdump(initialize))
 
