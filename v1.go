@@ -1,7 +1,8 @@
-package main
+package wire
 
 import (
 	"encoding/binary"
+	"errors"
 	"io"
 )
 
@@ -22,7 +23,6 @@ func (m *Message) WriteTo(w io.Writer) (int64, error) {
 		kind = m.Kind
 		size = uint32(len(m.Data))
 	)
-
 	// pack header
 	rep[0] = repMarker
 	rep[1] = repMagic
@@ -60,6 +60,10 @@ func (m *Message) WriteTo(w io.Writer) (int64, error) {
 	return int64(written), nil
 }
 
+var (
+	ErrMalformedMessage = errors.New("malformed wire format")
+)
+
 func (m *Message) ReadFrom(r io.Reader) (int64, error) {
 	var (
 		rep  [packetLen]byte
@@ -70,6 +74,9 @@ func (m *Message) ReadFrom(r io.Reader) (int64, error) {
 		return int64(read), err
 	}
 	read += n
+	if rep[0] != repMarker || rep[1] != repMagic || rep[2] != repMagic {
+		return int64(read), ErrMalformedMessage
+	}
 
 	// parse header
 	var (
@@ -83,6 +90,9 @@ func (m *Message) ReadFrom(r io.Reader) (int64, error) {
 		n, err := r.Read(rep[:])
 		if err != nil {
 			return int64(read), err
+		}
+		if rep[0] != repMarker {
+			return int64(read), ErrMalformedMessage
 		}
 		read += n
 		data = append(data, rep[1:]...) // read data after marker
