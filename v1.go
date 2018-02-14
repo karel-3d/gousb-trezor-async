@@ -1,4 +1,4 @@
-package wire
+package main
 
 import (
 	"encoding/binary"
